@@ -8,8 +8,8 @@ image:
 publish: image
 	docker push $(LATEST)
 
-run: image
-	docker run -v $(CURDIR)/tf2data:/home/steam/tf-dedicated/ -it $(LATEST)
+run:
+	docker run -it $(LATEST)
 
 shell: 
-	docker run -v $(CURDIR)/tf2data:/home/steam/tf-dedicated/ -it $(LATEST) bash
+	docker run -it $(LATEST) bash

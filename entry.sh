@@ -1,15 +1,5 @@
 #!/bin/bash
-mkdir -p "${STEAMAPPDIR}" || true  
-
-bash "${STEAMCMDDIR}/steamcmd.sh" +login anonymous \
-				+force_install_dir "${STEAMAPPDIR}" \
-				+app_update "${STEAMAPPID}" \
-				+quit
-
-cd "${STEAMAPPDIR}"
-bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -autoupdate \
-                        -steam_dir "${STEAMCMDDIR}" \
-                        -steamcmd_script "${HOMEDIR}/${STEAMAPP}_update.txt" \
+bash ./srcds_run -game "${STEAMAPP}" -console \
                         -usercon \
                         +fps_max "${SRCDS_FPSMAX}" \
                         -tickrate "${SRCDS_TICKRATE}" \

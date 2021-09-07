@@ -1,74 +1,93 @@
-FROM cm2network/steamcmd:root
+FROM debian:buster-slim
+
+LABEL maintainer="leigh.macdonald@gmail.com"
+
+ARG PUID=1000
+
+ENV USER steam
+ENV HOMEDIR "/home/${USER}"
 
 ENV STEAMAPPID 232250
 ENV STEAMAPP tf
 ENV STEAMAPPDIR "${HOMEDIR}/${STEAMAPP}-dedicated"
-ENV DLURL https://raw.githubusercontent.com/CM2Walki/TF2
 
 ENV METAMOD_VERSION 1.10
 ENV SOURCEMOD_VERSION 1.10
 
-COPY entry.sh ${HOMEDIR}/entry.sh
-
-RUN mkdir -p "${STEAMAPPDIR}/${STEAMAPP}"
-
 RUN set -x \
+	&& dpkg --add-architecture i386 \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends --no-install-suggests \
+		lib32stdc++6 \
+		lib32gcc1 \
 		wget \
 		ca-certificates \
-		lib32z1 \
-		libncurses5:i386 \
-		libbz2-1.0:i386 \
-		lib32gcc1 \
-		lib32stdc++6 \
-		libtinfo5:i386 \
-		libcurl3-gnutls:i386 \
-	&& mkdir -p "${STEAMAPPDIR}" \
-	&& { \
-		echo '@ShutdownOnFailedCommand 1'; \
-		echo '@NoPromptForPassword 1'; \
-		echo 'login anonymous'; \
-		echo 'force_install_dir '"${STEAMAPPDIR}"''; \
-		echo 'app_update '"${STEAMAPPID}"''; \
-		echo 'quit'; \
-	   } > "${HOMEDIR}/${STEAMAPP}_update.txt" \
-	&& chmod +x "${HOMEDIR}/entry.sh" \
-	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" "${HOMEDIR}/${STEAMAPP}_update.txt" \
-	&& rm -rf /var/lib/apt/lists/*
+		nano \
+		libsdl2-2.0-0:i386 \
+		curl \
+		locales \
+        && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+        && dpkg-reconfigure --frontend=noninteractive locales \
+	&& useradd -u "${PUID}" -m "${USER}" \
+	&& apt-get update && apt-get install -y wget apt-transport-https && wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
+	&& dpkg -i packages-microsoft-prod.deb \
+	&& rm packages-microsoft-prod.deb \
+	&& apt-get update \
+        && apt-get install -y --no-install-recommends --no-install-suggests \
+                aspnetcore-runtime-5.0 \
+                unzip \
+                ca-certificates \
+                lib32z1 \
+                libncurses5:i386 \
+                libbz2-1.0:i386 \
+                lib32gcc1 \
+                lib32stdc++6 \
+                libtinfo5:i386 \
+                libcurl3-gnutls:i386
 
-RUN wget -qO- https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git974-linux.tar.gz | tar xvzf - -C "${STEAMAPPDIR}/${STEAMAPP}"	
-RUN wget -qO- https://sm.alliedmods.net/smdrop/1.10/sourcemod-1.10.0-git6510-linux.tar.gz | tar xvzf - -C "${STEAMAPPDIR}/${STEAMAPP}"
+COPY entry.sh ${HOMEDIR}/entry.sh
+RUN chmod +x "${HOMEDIR}/entry.sh" \
+        && chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh"
+
+USER ${USER}
+WORKDIR ${HOMEDIR}
+
+RUN set -x \
+	&& wget https://github.com/SteamRE/DepotDownloader/releases/download/DepotDownloader_2.4.4/depotdownloader-2.4.4.zip \
+	&& unzip depotdownloader-2.4.4.zip \
+	&& mkdir -p "${STEAMAPPDIR}" \
+	&& dotnet ./DepotDownloader.dll -app "${STEAMAPPID}" -dir "${STEAMAPPDIR}" -max-downloads 16 -max-servers 32
+
+
+RUN set -x \
+	&& wget -qO- https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git974-linux.tar.gz | tar xvzf - -C "${STEAMAPPDIR}/${STEAMAPP}" \
+	&& wget -qO- https://sm.alliedmods.net/smdrop/1.10/sourcemod-1.10.0-git6510-linux.tar.gz | tar xvzf - -C "${STEAMAPPDIR}/${STEAMAPP}"
 
 COPY plugins/*.smx /home/steam/tf-dedicated/tf/addons/sourcemod/plugins/
 COPY extensions/*.so /home/steam/tf-dedicated/tf/addons/sourcemod/extensions/
-
-RUN ls -la /home/steam/tf-dedicated/tf/addons/sourcemod/plugins
-
+COPY data/* /home/steam/tf-dedicated/tf
 ENV SRCDS_FPSMAX=300 \
 	SRCDS_TICKRATE=66 \
 	SRCDS_PORT=27015 \
 	SRCDS_TV_PORT=27020 \
-        SRCDS_NET_PUBLIC_ADDRESS="0" \
-        SRCDS_IP="0" \
-	SRCDS_MAXPLAYERS=16 \
-	SRCDS_TOKEN=0 \
+        SRCDS_NET_PUBLIC_ADDRESS="" \
+        SRCDS_IP="" \
+	SRCDS_MAXPLAYERS=32 \
+	SRCDS_TOKEN="" \
 	SRCDS_RCONPW="changeme" \
-	SRCDS_PW="changeme" \
+	SRCDS_PW="" \
 	SRCDS_STARTMAP="ctf_2fort" \
 	SRCDS_REGION=3 \
-        SRCDS_HOSTNAME="New \"${STEAMAPP}\" Server" \
-        SRCDS_WORKSHOP_START_MAP=0 \
-        SRCDS_HOST_WORKSHOP_COLLECTION=0 \
-        SRCDS_WORKSHOP_AUTHKEY=""
+        SRCDS_HOSTNAME="TF2"
 
+WORKDIR /home/steam
+USER root
+
+RUN chown -R "${USER}:${USER}" . && chmod -R 755 .
 USER ${USER}
+WORKDIR "${STEAMAPPDIR}"
 
-VOLUME ${STEAMAPPDIR}
-
-WORKDIR ${HOMEDIR}
-
-CMD ["bash", "entry.sh"]
-
+CMD ["bash", "../entry.sh"]
+VOLUME ${STEAMAPPDIR}/tf/logs
 EXPOSE 27015/tcp 27015/udp 27020/udp
 
