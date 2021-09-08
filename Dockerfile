@@ -63,8 +63,6 @@ RUN set -x \
 	&& wget -qO- https://mms.alliedmods.net/mmsdrop/1.10/mmsource-1.10.7-git974-linux.tar.gz | tar xvzf - -C "${STEAMAPPDIR}/${STEAMAPP}" \
 	&& wget -qO- https://sm.alliedmods.net/smdrop/1.10/sourcemod-1.10.0-git6510-linux.tar.gz | tar xvzf - -C "${STEAMAPPDIR}/${STEAMAPP}"
 
-COPY plugins/*.smx /home/steam/tf-dedicated/tf/addons/sourcemod/plugins/
-COPY extensions/*.so /home/steam/tf-dedicated/tf/addons/sourcemod/extensions/
 COPY data/* /home/steam/tf-dedicated/tf
 ENV SRCDS_FPSMAX=300 \
 	SRCDS_TICKRATE=66 \
