@@ -5,6 +5,7 @@ bash ./srcds_run -game "${STEAMAPP}" -console \
                         -tickrate "${SRCDS_TICKRATE}" \
                         -port "${SRCDS_PORT}" \
                         +clientport "${SRCDS_CLIENT_PORT}" \
+			+tv_port "${SRCDS_TV_PORT}" \
                         +maxplayers "${SRCDS_MAXPLAYERS}" \
                         +map "${SRCDS_STARTMAP}" \
                         +sv_setsteamaccount "${SRCDS_TOKEN}" \
