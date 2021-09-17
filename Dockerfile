@@ -1,4 +1,4 @@
-FROM leighmacdonald/base-srcds:v0.0.1
+FROM cm2network/tf2:sourcemod
 
 COPY data/* /home/steam/tf-dedicated/tf
 
