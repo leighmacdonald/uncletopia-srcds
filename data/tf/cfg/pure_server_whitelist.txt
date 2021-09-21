@@ -74,8 +74,6 @@ whitelist
     particles\teleport_status.pcf                   trusted_source
     particles\water.pcf                             trusted_source
     particles\water_dx80.pcf                        trusted_source
-    particles\rockettrail.pcf                       trusted_source
-    particles\rockettrail_dx80.pcf                  trusted_source
     particles\stickybomb.pcf                        trusted_source
     particles\stickybomb_dx80.pcf                   trusted_source
 
@@ -83,5 +81,17 @@ whitelist
     materials\temp\...                              trusted_source
     materials\vgui\logos\...                        trusted_source
     materials\vgui\logos\ui\...                     trusted_source
-}
 
+    // Dominations removal mod
+    // https://gamebanana.com/mods/36617
+    resource\ui\freezepanel_basic.res               any
+    sound\ui\tf_domination.wav                      any
+    sound\ui\tf_nemesis.wav                         any
+    sound\ui\tf_revenge.wav                         any
+
+    // Toon rocket trails mod
+    // https://gamebanana.com/mods/12410
+    particles\rockettrail.pcf                       any
+    particles\rockettrail_dx80.pcf                  any
+
+}
