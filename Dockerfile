@@ -1,4 +1,4 @@
-FROM leighmacdonald/base-srcds:drop-umc
+FROM leighmacdonald/base-srcds:master
 
 RUN mv -v /home/steam/tf-dedicated/tf/addons/sourcemod/plugins/disabled/mapchooser.smx /home/steam/tf-dedicated/tf/addons/sourcemod/plugins/ 
 RUN mv -v /home/steam/tf-dedicated/tf/addons/sourcemod/plugins/disabled/nominations.smx /home/steam/tf-dedicated/tf/addons/sourcemod/plugins/ 
