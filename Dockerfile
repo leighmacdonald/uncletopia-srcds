@@ -7,3 +7,4 @@ FROM leighmacdonald/base-srcds:master
     
 COPY data/* /home/steam/tf-dedicated/tf
 
+VOLUME ${STEAMAPPDIR}/tf/addons/sourcemod/data/dumps
