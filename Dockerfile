@@ -1,4 +1,4 @@
-FROM ghcr.io/leighmacdonald/uncletopia-srcds:master
+FROM ghcr.io/leighmacdonald/base-srcds:master
 LABEL org.opencontainers.image.source="https://github.com/leighmacdonald/uncletopia-srcds"
 
 COPY data/* /home/steam/tf-dedicated/tf
