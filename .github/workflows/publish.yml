@@ -55,4 +55,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: '{ EVENT_PAYLOAD.repository.full_name }} failed to deploy :('
+          args: '{{ EVENT_PAYLOAD.repository.full_name }} failed to deploy :('
