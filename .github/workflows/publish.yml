@@ -33,13 +33,13 @@ jobs:
       - name: Deploy image
         uses: appleboy/ssh-action@master
         env:
-          BRANCH: "${GITHUB_REF##*/}"
+          BRANCH: ${GITHUB_REF##*/}
         with:
           host: "${{ secrets.HOST }}"
           username: "${{ secrets.SSH_USERNAME }}"
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
           envs: BRANCH
-          script: ./deploy_test-2.sh "${{ env.BRANCH }}"
+          script: ./deploy_test-2.sh
 
       - name: Success notification
         if: success()
