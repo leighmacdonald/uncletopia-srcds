@@ -17,45 +17,48 @@ This is the source for the docker image used for running uncletopia game servers
 This image was designed for use with the [uncletopia ansible](https://github.com/leighmacdonald/uncletopia) roles. I will work without that but you
 will have to generate all the config files yourself.
 
-    - name: srcds
-      docker_container:
-        name: srcds-{{ item.server_name_short }}
-        image: leighmacdonald/uncletopia-srcds:latest
-        state: started
-        restart: yes
-        network_mode: host
-        pull: yes
-        restart_policy: always
-        cpuset_cpus: "{{ loop0 * 2 }},{{ (loop0 * 2)+1 }}"
-        ports:
-          - "{{ srcds_base_port + (loop0 * 10) }}:{{ srcds_base_port + (loop0 * 10) }}/tcp"
-          - "{{ srcds_base_port + (loop0 * 10) }}:{{ srcds_base_port + (loop0 * 10) }}/udp"
-          - "{{ srcds_base_port + (loop0 * 10) + 1 }}:{{ srcds_base_port + (loop0 * 10) + 1 }}/udp"
-        env:
-          SRCDS_TOKEN: "{{ item.gslt }}"
-          SRCDS_PORT: "{{ srcds_base_port + (loop0 * 10) }}"
-          SRCDS_TV_PORT: "{{ srcds_base_port + 100 }}"
-          SRCDS_REGION: "{{ sv_region|quote }}"
-          SRCDS_HOSTNAME: "{{ item.name }}"
-          SRCDS_PW: "{{ server_password }}"
-          SRCDS_STARTMAP: "{{ start_map }}"
-          SRCDS_RCONPW: "{{ rcon_password }}"
-          SRCDS_IP: "{{ ip }}"
-          SRCDS_MAXPLAYERS: "32"
-        volumes:
-          - /build/{{ item.server_name_short }}/server.cfg:/home/steam/tf-dedicated/tf/cfg/server.cfg
-          - /build/admins_simple.ini:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/admins_simple.ini
-          - /build/umc_mapcycle.txt:/home/steam/tf-dedicated/tf/umc_mapcycle.txt
-          - /build/umc_mapcycle_nominate.txt:/home/steam/tf-dedicated/tf/umc_mapcycle_nominate.txt
-          - /build/motd.txt:/home/steam/tf-dedicated/tf/cfg/motd.txt
-          - /build/mapcycle_halloween.txt:/home/steam/tf-dedicated/tf/cfg/mapcycle_halloween.txt
-          - /build/pure_server_whitelist.txt:/home/steam/tf-dedicated/tf/cfg/pure_server_whitelist.txt
-          - /build/sourcemod.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/sourcemod.cfg
-          - /build/admin_overrides.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/admin_overrides.cfg
-          - /build/gbans.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/gbans.cfg
-      loop: "{{ services }}"
-      loop_control:
-        index_var: loop0
+  docker run -d \
+    --network host \
+    -e "SRCDS_TOKEN=${SRCDS_TOKEN}" \
+    -e "SRCDS_HOSTNAME=${SRCDS_HOSTNAME}" \
+    -e "SRCDS_PW=${SRCDS_PW}" \
+    -e "SRCDS_RCONPW=${SRCDS_RCONPW}" \
+    -e "SRCDS_IP=${SRCDS_IP}" \
+    -e "SRCDS_PORT=27055" \
+    -e "SRCDS_TV_PORT=27056" \
+    -e "SRCDS_REGION=0" \
+    -e "SRCDS_STARTMAP=pl_badwater" \
+    -e "SRCDS_NET_PUBLIC_ADDRESS=" \
+    -e "SRCDS_TICKRATE=66" \
+    -e "SRCDS_FPSMAX=300" \
+    -e "STEAMAPPDIR=/home/steam/tf-dedicated" \
+    -e "STEAMAPP=tf" \
+    -e "STEAMAPPID=232250" \
+    -e "STEAM_GAMESERVER_PACKET_HANDLER_NO_IPC=1" \
+    -e "STEAM_GAMESERVER_RATE_LIMIT_200MS=25" \
+    -e "STEAM_GAMESERVER_A2S_INFO_STRICT_LEGACY_PROTOCOL=0" \
+    -e "SRCDS_MAXPLAYERS=32" \
+    -v /build/core.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/core.cfg \
+    -v /build/test-2/autoexec.cfg:/home/steam/tf-dedicated/tf/cfg/autoexec.cfg \
+    -v /build/test-2/server.cfg:/home/steam/tf-dedicated/tf/cfg/server.cfg \
+    -v /build/admins_simple.ini:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/admins_simple.ini \
+    -v /build/motd.txt:/home/steam/tf-dedicated/tf/cfg/motd.txt \
+    -v /build/admin_overrides.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/admin_overrides.cfg \
+    -v /build/gbans.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/gbans.cfg \
+    -v /build/test-2/mapcycle.txt:/home/steam/tf-dedicated/tf/cfg/mapcycle.txt \
+    -v /build/randomcycle.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/randomcycle.cfg \
+    -v /build/rtv.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/rtv.cfg \
+    -v /build/sourcemod.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/sourcemod.cfg \
+    -v /build/mapchooser.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/mapchooser.cfg \
+    -v /build/discord.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/discord.cfg \
+    -v /build/test-2/maplists.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/maplists.cfg \
+    -v /build/autorecorder.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/autorecorder.cfg \
+    -v /build/nativevotes.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/nativevotes.cfg \
+    -p 27115:27115/udp \
+    -p 27115:27115/tcp \
+    --restart=always \
+    --name uncletopia-srcds-test-2 \
+    ghcr.io/leighmacdonald/uncletopia-srcds:${BRANCH}
 
 ## Building & Upload to docker hub
 
