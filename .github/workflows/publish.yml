@@ -20,3 +20,89 @@ jobs:
       run: |
         docker build . --tag ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
         docker push ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
+
+   deploy-staging:
+      name: Deploy
+      runs-on: ubuntu-latest
+      needs: publish-base-srcds-image
+      if: github.ref != 'refs/heads/master'
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+        - name: Deploy image
+          uses: appleboy/ssh-action@master
+          env:
+            SRCDS_TOKEN: "${{ secrets.GSLT }}"
+            SRCDS_HOSTNAME: "${{ secrets.HOSTNAME }}"
+            SRCDS_PW: "${{ secrets.PW }}"
+            SRCDS_RCONPW: "${{ secrets.RCONPW }}"
+            SRCDS_IP: "${{ secrets.IP }}"
+          with:
+            host: "test-2.ca.uncletopia.com"
+            username: ${{ secrets.SSH_USERNAME }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            envs: SRCDS_TOKEN,SRCDS_HOSTNAME,SRCDS_PW,SRCDS_RCONPW,SRCDS_IP
+            script: |
+              docker stop uncletopia-srcds-test-2
+              docker rm uncletopia-srcds-test-2
+              docker run -d \
+                --network host \
+                -e "SRCDS_TOKEN=$SRCDS_TOKEN" \
+                -e "SRCDS_HOSTNAME=$SRCDS_HOSTNAME" \
+                -e "SRCDS_PW=$SRCDS_PW" \
+                -e "SRCDS_RCONPW=$SRCDS_RCONPW" \
+                -e "SRCDS_IP=$SRCDS_IP" \
+                -e "SRCDS_PORT=27055" \
+                -e "SRCDS_TV_PORT=27056" \
+                -e "SRCDS_REGION=0" \
+                -e "SRCDS_STARTMAP=pl_badwater" \
+                -e "SRCDS_NET_PUBLIC_ADDRESS=" \
+                -e "SRCDS_TICKRATE=66" \
+                -e "SRCDS_FPSMAX=300" \
+                -e "STEAMAPPDIR=/home/steam/tf-dedicated" \
+                -e "STEAMAPP=tf" \
+                -e "STEAMAPPID=232250" \
+                -e "STEAM_GAMESERVER_PACKET_HANDLER_NO_IPC=1" \
+                -e "STEAM_GAMESERVER_RATE_LIMIT_200MS=25" \
+                -e "STEAM_GAMESERVER_A2S_INFO_STRICT_LEGACY_PROTOCOL=0" \
+                -e "SRCDS_MAXPLAYERS=32" \
+                -v /build/core.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/core.cfg \
+                -v /build/test-2/autoexec.cfg:/home/steam/tf-dedicated/tf/cfg/autoexec.cfg \
+                -v /build/test-2/server.cfg:/home/steam/tf-dedicated/tf/cfg/server.cfg \
+                -v /build/admins_simple.ini:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/admins_simple.ini \
+                -v /build/motd.txt:/home/steam/tf-dedicated/tf/cfg/motd.txt \
+                -v /build/admin_overrides.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/admin_overrides.cfg \
+                -v /build/gbans.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/gbans.cfg \
+                -v /build/test-2/mapcycle.txt:/home/steam/tf-dedicated/tf/cfg/mapcycle.txt \
+                -v /build/randomcycle.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/randomcycle.cfg \
+                -v /build/rtv.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/rtv.cfg \
+                -v /build/sourcemod.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/sourcemod.cfg \
+                -v /build/mapchooser.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/mapchooser.cfg \
+                -v /build/discord.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/discord.cfg \
+                -v /build/test-2/maplists.cfg:/home/steam/tf-dedicated/tf/addons/sourcemod/configs/maplists.cfg \
+                -v /build/autorecorder.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/autorecorder.cfg \
+                -v /build/nativevotes.cfg:/home/steam/tf-dedicated/tf/cfg/sourcemod/nativevotes.cfg \
+                -p 27115:27115/udp \
+                -p 27115:27115/tcp \
+                --restart=always \
+                --name uncletopia-srcds-test-2 \
+                ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
+              sleep 20
+              #docker image prune -af
+
+        - name: Success notification
+          if: success()
+          env:
+            DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          uses: Ilshidur/action-discord@master
+          with:
+            args: '{{ EVENT_PAYLOAD.repository.full_name }} has been deployed :)'
+
+        - name: Failure notification
+          if: failure()
+          env:
+            DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          uses: Ilshidur/action-discord@master
+          with:
+            args: '{ EVENT_PAYLOAD.repository.full_name }} failed to deploy :('
