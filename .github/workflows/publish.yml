@@ -89,7 +89,6 @@ jobs:
                 --name uncletopia-srcds-test-2 \
                 ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
               sleep 20
-              #docker image prune -af
 
         - name: Success notification
           if: success()
