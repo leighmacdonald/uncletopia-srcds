@@ -44,8 +44,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: SRCDS_TOKEN,SRCDS_HOSTNAME,SRCDS_PW,SRCDS_RCONPW,SRCDS_IP
           script: |
-            docker stop uncletopia-srcds-test-2
-            docker rm uncletopia-srcds-test-2
+            #docker stop uncletopia-srcds-test-2
+            #docker rm uncletopia-srcds-test-2
             docker run -d \
               --network host \
               -e "SRCDS_TOKEN=$SRCDS_TOKEN" \
