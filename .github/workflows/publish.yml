@@ -38,11 +38,12 @@ jobs:
           SRCDS_PW: "${{ secrets.PW }}"
           SRCDS_RCONPW: "${{ secrets.RCONPW }}"
           SRCDS_IP: "${{ secrets.IP }}"
+          BRANCH: "${GITHUB_REF##*/}"
         with:
           host: "test-2.ca.uncletopia.com"
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: SRCDS_TOKEN,SRCDS_HOSTNAME,SRCDS_PW,SRCDS_RCONPW,SRCDS_IP
+          envs: SRCDS_TOKEN,SRCDS_HOSTNAME,SRCDS_PW,SRCDS_RCONPW,SRCDS_IP,BRANCH
           script: |
             #docker stop uncletopia-srcds-test-2
             #docker rm uncletopia-srcds-test-2
@@ -87,7 +88,7 @@ jobs:
               -p 27115:27115/tcp \
               --restart=always \
               --name uncletopia-srcds-test-2 \
-              ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
+              ghcr.io/leighmacdonald/uncletopia-srcds:$BRANCH
             sleep 20
 
       - name: Success notification
