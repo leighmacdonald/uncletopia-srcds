@@ -38,8 +38,8 @@ jobs:
           host: "${{ secrets.HOST }}"
           username: "${{ secrets.SSH_USERNAME }}"
           key: "${{ secrets.SSH_PRIVATE_KEY }}"
-          envs: SRCDS_TOKEN,SRCDS_HOSTNAME,SRCDS_PW,SRCDS_RCONPW,SRCDS_IP,BRANCH
-          script: ./deploy_test-2.sh "${GITHUB_REF##*/}"
+          envs: BRANCH
+          script: ./deploy_test-2.sh "${{ env.BRANCH }}"
 
       - name: Success notification
         if: success()
