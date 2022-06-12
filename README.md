@@ -56,9 +56,3 @@ will have to generate all the config files yourself.
       loop: "{{ services }}"
       loop_control:
         index_var: loop0
-
-## Building & Upload to docker hub
-
-    make image && make publish
-    
- 
