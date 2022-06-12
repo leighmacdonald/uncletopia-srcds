@@ -9,17 +9,21 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Login to GitHub Container Registry
+    - name: Login to DockerHub
       uses: docker/login-action@v1
       with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build uncletopia-srcds image
-      run: |
-        docker build . --tag ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
-        docker push ghcr.io/leighmacdonald/uncletopia-srcds:${GITHUB_REF##*/}
+    - name: Build and push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: leighmacdonald/uncletopia-srcds:latest
+
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
 
   deploy-staging:
     name: Deploy
