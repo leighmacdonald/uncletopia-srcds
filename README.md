@@ -6,7 +6,6 @@ This is the source for the docker image used for running uncletopia game servers
 - Game assets are downloaded into the base image in a reproducible manner vs steamcmd updating itself automatically on launch. This means its larger, but its easier to manage the shared game data when you are using multiple containers on a single host.
 - Extensions/plugins/configs that we use are *included* in the base image.
 
-
 ## TODO
 
 - Add build container for compiling plugins during build to copy from instead of the precompiled versions.
